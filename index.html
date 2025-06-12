@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Línea de Tiempo Histórica de San Rafael</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Playfair+Display:wght@400;700&display=swap');
+        
+        :root {
+            --primary: #3b5998;
+            --secondary: #8b9dc3;
+            --accent: #f7b731;
+            --background: #f0f2f5;
+            --text: #2c3e50;
+            --danger: #e74c3c;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        h1, h2, h3 {
+            font-family: 'Playfair Display', serif;
+        }
+        
+        .timeline {
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            background: linear-gradient(to bottom, #3b5998, #8b9dc3, #f7b731);
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -3px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+        
+        .timeline-item {
+            padding: 10px 40px;
+            position: relative;
+            width: 50%;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+        
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            background-color: var(--accent);
+            border: 4px solid var(--primary);
+            top: 15px;
+            border-radius: 50%;
+            z-index: 1;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .left {
+            left: 0;
+        }
+        
+        .right {
+            left: 50%;
+        }
+        
+        .left::after {
+            right: -12px;
+        }
+        
+        .right::after {
+            left: -13px;
+        }
+        
+        .timeline-content {
+            padding: 20px;
+            background: white;
+            position: relative;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            cursor: pointer;
+            border-left: 5px solid var(--primary);
+        }
+        
+        .timeline-content:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+        
+        .timeline-content h2 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .timeline-date {
+            color: var(--accent);
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+        
+        .timeline-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+        
+        .timeline-content.active .timeline-details {
+            max-height: 500px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed var(--secondary);
+        }
+        
+        .timeline-item:hover::after {
+            background-color: var(--primary);
+            transform: scale(1.2);
+        }
+        
+        .add-event-form {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+            border-top: 5px solid var(--accent);
+        }
+        
+        .image-preview {
+            width: 100%;
+            height: 200px;
+            background-color: #f1f1f1;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .image-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        @media screen and (max-width: 768px) {
+            .timeline::after {
+                left: 31px;
+            }
+            
+            .timeline-item {
+                width: 100%;
+                padding-left: 70px;
+                padding-right: 25px;
+            }
+            
+            .timeline-item::after {
+                left: 18px;
+            }
+            
+            .left::after, .right::after {
+                left: 18px;
+            }
+            
+            .right {
+                left: 0;
+            }
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .btn:hover {
+            background-color: #2d4373;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #7289b9;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(59, 89, 152, 0.2);
+        }
+        
+        .era-marker {
+            text-align: center;
+            padding: 15px;
+            margin: 30px 0;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 10px;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .era-marker h2 {
+            margin: 0;
+            font-size: 1.8rem;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+        
+        .timeline-image {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-top: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
+        
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            color: var(--secondary);
+        }
+        
+        .tooltip {
+            position: absolute;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            white-space: nowrap;
+        }
+        
+        .timeline-item:hover .tooltip {
+            opacity: 1;
+        }
+        
+        .animate-pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .timeline-header {
+            background: linear-gradient(135deg, #3b5998, #8b9dc3);
+            padding: 30px 20px;
+            text-align: center;
+            border-radius: 15px;
+            margin-bottom: 40px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .timeline-header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            animation: rotate 20s linear infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: var(--danger);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+        }
+        
+        .timeline-content:hover .delete-btn {
+            opacity: 1;
+        }
+        
+        .management-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-gap: 1rem;
+        }
+        
+        .grid-cols-1 {
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+        }
+        
+        @media (min-width: 768px) {
+            .md\:grid-cols-2 {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+        
+        .gap-4 {
+            gap: 1rem;
+        }
+        
+        .mt-2 {
+            margin-top: 0.5rem;
+        }
+        
+        .mt-3 {
+            margin-top: 0.75rem;
+        }
+        
+        .mt-4 {
+            margin-top: 1rem;
+        }
+        
+        .mb-2 {
+            margin-bottom: 0.5rem;
+        }
+        
+        .mb-3 {
+            margin-bottom: 0.75rem;
+        }
+        
+        .mb-4 {
+            margin-bottom: 1rem;
+        }
+        
+        .w-full {
+            width: 100%;
+        }
+        
+        .block {
+            display: block;
+        }
+        
+        .font-semibold {
+            font-weight: 600;
+        }
+        
+        .text-gray-500 {
+            color: #6b7280;
+        }
+        
+        .text-gray-700 {
+            color: #374151;
+        }
+        
+        .text-xs {
+            font-size: 0.75rem;
+        }
+        
+        .text-lg {
+            font-size: 1.125rem;
+        }
+        
+        .text-xl {
+            font-size: 1.25rem;
+        }
+        
+        .text-2xl {
+            font-size: 1.5rem;
+        }
+        
+        .text-4xl {
+            font-size: 2.25rem;
+        }
+        
+        .text-5xl {
+            font-size: 3rem;
+        }
+        
+        .font-bold {
+            font-weight: 700;
+        }
+        
+        .px-2 {
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+        
+        .py-1 {
+            padding-top: 0.25rem;
+            padding-bottom: 0.25rem;
+        }
+        
+        .px-4 {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        
+        .py-8 {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        
+        .rounded-full {
+            border-radius: 9999px;
+        }
+        
+        .ml-2 {
+            margin-left: 0.5rem;
+        }
+        
+        .bg-gray-200 {
+            background-color: #e5e7eb;
+        }
+        
+        .flex {
+            display: flex;
+        }
+        
+        .justify-end {
+            justify-content: flex-end;
+        }
+        
+        .justify-between {
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="timeline-header">
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-3">Historia de San Rafael</h1>
+            <p class="text-white text-lg opacity-90">Un viaje a través del tiempo: desde 12.000 a.C. hasta 1930</p>
+        </div>
+        
+        <div class="add-event-form">
+            <h2 class="text-2xl font-bold mb-4">Agregar Nuevo Evento Histórico</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block mb-2 font-semibold">Año/Período:</label>
+                    <input type="text" id="event-date" placeholder="Ej: 1810 o 3000 a.C." class="w-full">
+                </div>
+                <div>
+                    <label class="block mb-2 font-semibold">Título del Evento:</label>
+                    <input type="text" id="event-title" placeholder="Título del evento histórico" class="w-full">
+                </div>
+            </div>
+            
+            <div class="mt-3">
+                <label class="block mb-2 font-semibold">Descripción:</label>
+                <textarea id="event-description" rows="3" placeholder="Describe el evento histórico..." class="w-full"></textarea>
+            </div>
+            
+            <div class="mt-3">
+                <label class="block mb-2 font-semibold">Imagen:</label>
+                <input type="file" id="event-image" accept="image/*" class="w-full">
+                <div class="image-preview mt-2" id="image-preview">
+                    <p class="text-gray-500">Vista previa de la imagen</p>
+                </div>
+            </div>
+            
+            <div class="flex justify-end mt-4">
+                <button id="add-event-btn" class="btn">Agregar Evento</button>
+            </div>
+        </div>
+        
+        <div class="management-controls">
+            <button id="remove-all-btn" class="btn btn-danger">Eliminar Todos los Eventos</button>
+            <button id="remove-default-btn" class="btn btn-secondary">Eliminar Solo Eventos Predeterminados</button>
+            <button onclick="guardarHTML()" class="btn">Guardar cambios</button>
+        </div>
+
+        <div class="era-marker animate-pulse">
+            <h2>Línea de Tiempo Histórica</h2>
+        </div>
+        
+        <div class="timeline" id="timeline-container">
+            <div class="empty-state" id="empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h3 class="text-xl font-bold mb-2">No hay eventos históricos</h3>
+                <p>Agrega tu primer evento usando el formulario de arriba</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar eventos de ejemplo
+            const initialEvents = [
+                {
+                    date: '12.000 a.C.',
+                    title: 'Primeros Pobladores',
+                    description: 'Evidencias arqueológicas sugieren la presencia de los primeros grupos humanos nómadas en la región de San Rafael, dedicados principalmente a la caza y recolección.',
+                    image: null,
+                    isDefault: true
+                },
+                {
+                    date: '3.000 a.C.',
+                    title: 'Desarrollo de Comunidades Agrícolas',
+                    description: 'Surgen las primeras comunidades sedentarias con desarrollo de agricultura básica y domesticación de animales en los valles fértiles de la región.',
+                    image: null,
+                    isDefault: true
+                },
+                {
+                    date: '1551',
+                    title: 'Llegada de los Españoles',
+                    description: 'Los primeros exploradores españoles llegan a la región, estableciendo contacto con las comunidades indígenas locales y comenzando el período colonial.',
+                    image: null,
+                    isDefault: true
+                },
+                {
+                    date: '1805',
+                    title: 'Fundación del Fuerte',
+                    description: 'Se establece un fuerte militar para proteger la frontera sur contra incursiones indígenas, sentando las bases para el futuro asentamiento urbano.',
+                    image: null,
+                    isDefault: true
+                },
+                {
+                    date: '1870',
+                    title: 'Fundación Oficial de San Rafael',
+                    description: 'Se establece oficialmente la ciudad de San Rafael como un centro administrativo y comercial importante para la región sur.',
+                    image: null,
+                    isDefault: true
+                },
+                {
+                    date: '1903',
+                    title: 'Llegada del Ferrocarril',
+                    description: 'La conexión ferroviaria llega a San Rafael, impulsando significativamente el desarrollo económico y la inmigración europea a la región.',
+                    image: null,
+                    isDefault: true
+                },
+                {
+                    date: '1930',
+                    title: 'Desarrollo Vitivinícola',
+                    description: 'San Rafael se consolida como una importante región vitivinícola, con numerosas bodegas establecidas por inmigrantes europeos que transforman la economía local.',
+                    image: null,
+                    isDefault: true
+                }
+            ];
+            
+            // Cargar eventos desde localStorage o usar los iniciales si no hay datos guardados
+            let events = JSON.parse(localStorage.getItem('timelineEvents'));
+            
+            // Si no hay eventos guardados, usar los iniciales
+            if (!events) {
+                events = initialEvents;
+                localStorage.setItem('timelineEvents', JSON.stringify(events));
+            }
+            
+            renderTimeline(events);
+            
+            // Manejar la vista previa de la imagen
+            document.getElementById('event-image').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const imgPreview = document.getElementById('image-preview');
+                        imgPreview.innerHTML = `<img src="${event.target.result}" alt="Vista previa">`;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Manejar la adición de nuevos eventos
+            document.getElementById('add-event-btn').addEventListener('click', function() {
+                const date = document.getElementById('event-date').value.trim();
+                const title = document.getElementById('event-title').value.trim();
+                const description = document.getElementById('event-description').value.trim();
+                const imageInput = document.getElementById('event-image');
+                
+                if (!date || !title || !description) {
+                    alert('Por favor completa todos los campos requeridos');
+                    return;
+                }
+                
+                let imageData = null;
+                if (imageInput.files && imageInput.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imageData = e.target.result;
+                        
+                        // Agregar el nuevo evento
+                        const newEvent = {
+                            date: date,
+                            title: title,
+                            description: description,
+                            image: imageData,
+                            isDefault: false
+                        };
+                        
+                        events.push(newEvent);
+                        
+                        // Ordenar eventos cronológicamente
+                        events = sortEvents(events);
+                        
+                        // Guardar en localStorage
+                        localStorage.setItem('timelineEvents', JSON.stringify(events));
+                        
+                        // Renderizar la línea de tiempo actualizada
+                        renderTimeline(events);
+                        
+                        // Limpiar el formulario
+                        document.getElementById('event-date').value = '';
+                        document.getElementById('event-title').value = '';
+                        document.getElementById('event-description').value = '';
+                        document.getElementById('event-image').value = '';
+                        document.getElementById('image-preview').innerHTML = '<p class="text-gray-500">Vista previa de la imagen</p>';
+                    };
+                    reader.readAsDataURL(imageInput.files[0]);
+                } else {
+                    // Agregar el nuevo evento sin imagen
+                    const newEvent = {
+                        date: date,
+                        title: title,
+                        description: description,
+                        image: null,
+                        isDefault: false
+                    };
+                    
+                    events.push(newEvent);
+                    
+                    // Ordenar eventos cronológicamente
+                    events = sortEvents(events);
+                    
+                    // Guardar en localStorage
+                    localStorage.setItem('timelineEvents', JSON.stringify(events));
+                    
+                    // Renderizar la línea de tiempo actualizada
+                    renderTimeline(events);
+                    
+                    // Limpiar el formulario
+                    document.getElementById('event-date').value = '';
+                    document.getElementById('event-title').value = '';
+                    document.getElementById('event-description').value = '';
+                    document.getElementById('image-preview').innerHTML = '<p class="text-gray-500">Vista previa de la imagen</p>';
+                }
+            });
+            
+            // Eliminar todos los eventos
+            document.getElementById('remove-all-btn').addEventListener('click', function() {
+                if (confirm('¿Estás seguro de que deseas eliminar TODOS los eventos de la línea de tiempo?')) {
+                    events = [];
+                    localStorage.setItem('timelineEvents', JSON.stringify(events));
+                    renderTimeline(events);
+                }
+            });
+            
+            // Eliminar solo los eventos predeterminados
+            document.getElementById('remove-default-btn').addEventListener('click', function() {
+                if (confirm('¿Estás seguro de que deseas eliminar todos los eventos PREDETERMINADOS de la línea de tiempo?')) {
+                    events = events.filter(event => !event.isDefault);
+                    localStorage.setItem('timelineEvents', JSON.stringify(events));
+                    renderTimeline(events);
+                }
+            });
+            
+            // Función para ordenar eventos cronológicamente
+            function sortEvents(events) {
+                return events.sort((a, b) => {
+                    // Extraer años y determinar si son a.C. o d.C.
+                    const yearA = extractYear(a.date);
+                    const yearB = extractYear(b.date);
+                    return yearA - yearB;
+                });
+            }
+            
+            // Función para extraer el año numérico de una fecha
+            function extractYear(dateStr) {
+                dateStr = dateStr.toString().toLowerCase();
+                let year = parseInt(dateStr.match(/\d+/)[0]);
+                
+                // Si es a.C., convertir a número negativo para ordenar correctamente
+                if (dateStr.includes('a.c.') || dateStr.includes('a. c.') || dateStr.includes('ac')) {
+                    year = -year;
+                }
+                
+                return year;
+            }
+            
+            // Función para renderizar la línea de tiempo
+            function renderTimeline(events) {
+                const container = document.getElementById('timeline-container');
+                const emptyState = document.getElementById('empty-state');
+                
+                // Mostrar estado vacío si no hay eventos
+                if (events.length === 0) {
+                    emptyState.style.display = 'block';
+                    container.innerHTML = '';
+                    return;
+                }
+                
+                // Ocultar estado vacío si hay eventos
+                emptyState.style.display = 'none';
+                
+                // Limpiar el contenedor
+                container.innerHTML = '';
+                
+                // Renderizar cada evento
+                events.forEach((event, index) => {
+                    const position = index % 2 === 0 ? 'left' : 'right';
+                    const timelineItem = document.createElement('div');
+                    timelineItem.className = `timeline-item ${position}`;
+                    timelineItem.dataset.index = index;
+                    
+                    let imageHtml = '';
+                    if (event.image) {
+                        imageHtml = `<img src="${event.image}" alt="${event.title}" class="timeline-image">`;
+                    }
+                    
+                    const defaultBadge = event.isDefault ? 
+                        '<span class="bg-gray-200 text-gray-700 text-xs font-semibold px-2 py-1 rounded-full ml-2">Predeterminado</span>' : '';
+                    
+                    timelineItem.innerHTML = `
+                        <div class="timeline-content">
+                            <div class="delete-btn" data-index="${index}">×</div>
+                            <div class="timeline-date">${event.date}</div>
+                            <h2 class="text-xl font-bold">${event.title} ${defaultBadge}</h2>
+                            <div class="timeline-details">
+                                <p>${event.description}</p>
+                                ${imageHtml}
+                            </div>
+                        </div>
+                        <div class="tooltip">Click para expandir</div>
+                    `;
+                    
+                    container.appendChild(timelineItem);
+                    
+                    // Agregar evento de clic para expandir/contraer
+                    const content = timelineItem.querySelector('.timeline-content');
+                    content.addEventListener('click', function(e) {
+                        // No expandir si se hizo clic en el botón de eliminar
+                        if (e.target.classList.contains('delete-btn')) {
+                            return;
+                        }
+                        this.classList.toggle('active');
+                    });
+                    
+                    // Agregar evento de clic para eliminar
+                    const deleteBtn = timelineItem.querySelector('.delete-btn');
+                    deleteBtn.addEventListener('click', function() {
+                        const index = parseInt(this.dataset.index);
+                        if (confirm('¿Estás seguro de que deseas eliminar este evento?')) {
+                            events.splice(index, 1);
+                            localStorage.setItem('timelineEvents', JSON.stringify(events));
+                            renderTimeline(events);
+                        }
+                    });        
+                });
+            }
+        });
+
+        function guardarHTML() {
+    const events = JSON.parse(localStorage.getItem('timelineEvents')) || [];
+    const timelineHTML = generarHTMLDeEventos(events);
+
+    const doc = document.documentElement.cloneNode(true);
+
+    const container = doc.querySelector('#timeline-container');
+    const emptyState = doc.querySelector('#empty-state');
+    if (container && emptyState) {
+        emptyState.remove();
+        container.innerHTML = timelineHTML;
+    }
+
+    const scripts = doc.querySelectorAll('script');
+    scripts.forEach(script => {
+        script.remove();
+    });
+
+    const contenido = '<!DOCTYPE html>\n' + doc.outerHTML;
+    const blob = new Blob([contenido], { type: 'text/html' });
+    const enlace = document.createElement('a');
+    enlace.href = URL.createObjectURL(blob);
+    enlace.download = 'pagina_actualizada.html';
+    enlace.click();
+}
+
+        function generarHTMLDeEventos(events) {
+    let html = '';
+    events.forEach((event, index) => {
+        const position = index % 2 === 0 ? 'left' : 'right';
+        const imageHtml = event.image ? `<img src="${event.image}" alt="${event.title}" class="timeline-image">` : '';
+        const defaultBadge = event.isDefault ?
+            '<span class="bg-gray-200 text-gray-700 text-xs font-semibold px-2 py-1 rounded-full ml-2">Predeterminado</span>' : '';
+
+        html += `
+            <div class="timeline-item ${position}">
+                <div class="timeline-content active">
+                    <div class="timeline-date">${event.date}</div>
+                    <h2 class="text-xl font-bold">${event.title} ${defaultBadge}</h2>
+                    <div class="timeline-details" style="max-height: 500px; margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--secondary);">
+                        <p>${event.description}</p>
+                        ${imageHtml}
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    return html;
+}
+
+
+    </script>
+</body>
+</html>
+
