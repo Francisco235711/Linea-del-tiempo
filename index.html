@@ -624,17 +624,27 @@
                 }
             ];
             
-            // Cargar eventos desde localStorage o usar los iniciales si no hay datos guardados
-            let events = JSON.parse(localStorage.getItem('timelineEvents'));
-            
-            // Si no hay eventos guardados, usar los iniciales
-            if (!events) {
-                events = initialEvents;
-                localStorage.setItem('timelineEvents', JSON.stringify(events));
-            }
-            
-            renderTimeline(events);
-            
+            fetch('eventos_exportados.json')
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`No se pudo cargar el archivo JSON (${response.status})`);
+        }
+        return response.json();
+    })
+    .then(eventos => {
+        localStorage.setItem('timelineEvents', JSON.stringify(eventos));
+        renderTimeline(eventos);
+    })
+    .catch(error => {
+        console.warn('No se pudo cargar el JSON externo. Se usarán eventos locales.');
+        let events = JSON.parse(localStorage.getItem('timelineEvents'));
+        if (!events) {
+            events = initialEvents;
+            localStorage.setItem('timelineEvents', JSON.stringify(events));
+        }
+        renderTimeline(events);
+    });
+
             // Manejar la vista previa de la imagen
             document.getElementById('event-image').addEventListener('change', function(e) {
                 const file = e.target.files[0];
