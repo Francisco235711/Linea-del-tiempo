@@ -733,6 +733,15 @@
                     // Renderizar la línea de tiempo actualizada
                     renderTimeline(events);
                     
+                    // 🔄 Scroll suave y expansión automática del nuevo evento
+                    setTimeout(() => {
+                        const lastItem = document.querySelector('.timeline-item:last-child .timeline-content');
+                        if (lastItem) {
+                            lastItem.classList.add('active');
+                            lastItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }, 100);
+
                     // Limpiar el formulario
                     document.getElementById('event-date').value = '';
                     document.getElementById('event-title').value = '';
