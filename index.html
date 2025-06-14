@@ -802,8 +802,14 @@
                     let imageHtml = '';
                     if (event.image) {
                         imageHtml = `<img src="${event.image}" alt="${event.title}" class="timeline-image">`;
+                    } else {
+                        imageHtml = `
+                            <div class="mt-3">
+                                <label class="block text-sm font-semibold mb-1">Agregar imagen:</label>
+                                <input type="file" accept="image/*" class="add-image-input" data-index="${index}">
+                            </div>
+                        `;
                     }
-                    
                     const defaultBadge = event.isDefault ? 
                         '<span class="bg-gray-200 text-gray-700 text-xs font-semibold px-2 py-1 rounded-full ml-2">Predeterminado</span>' : '';
                     
@@ -821,6 +827,27 @@
                     `;
                     
                     container.appendChild(timelineItem);
+                    // Agregar evento para subir imagen si no tenía
+                    const imageInput = timelineItem.querySelector('.add-image-input');
+                    if (imageInput) {
+                        imageInput.addEventListener('change', function (e) {
+                            const file = e.target.files[0];
+                            if (!file) return;
+
+                            const reader = new FileReader();
+                            reader.onload = function (event) {
+                                events[index].image = event.target.result;
+
+                                // Guardar en localStorage
+                                localStorage.setItem('timelineEvents', JSON.stringify(events));
+
+                                // Volver a renderizar
+                                renderTimeline(events);
+                            };
+                            reader.readAsDataURL(file);
+                        });
+                    }
+
                     
                     // Agregar evento de clic para expandir/contraer
                     const content = timelineItem.querySelector('.timeline-content');
