@@ -898,17 +898,6 @@
 
 
     </script>
-    <script>
-fetch('eventos_exportados.json')
-  .then(response => response.json())
-  .then(eventos => {
-    localStorage.setItem('timelineEvents', JSON.stringify(eventos));
-    renderTimeline(eventos);
-  })
-  .catch(error => {
-    console.error('Error al cargar el archivo JSON:', error);
-  });
-</script>
 
 </body>
 </html>
