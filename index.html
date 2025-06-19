@@ -346,27 +346,6 @@
             to { transform: rotate(360deg); }
         }
         
-        .delete-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: var(--danger);
-            color: white;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            z-index: 10;
-        }
-        
-        .timeline-content:hover .delete-btn {
-            opacity: 1;
-        }
         
         .management-controls {
             display: flex;
@@ -815,17 +794,7 @@
                         }
                         this.classList.toggle('active');
                     });
-                    
-                    // Agregar evento de clic para eliminar
-                    const deleteBtn = timelineItem.querySelector('.delete-btn');
-                    deleteBtn.addEventListener('click', function() {
-                        const index = parseInt(this.dataset.index);
-                        if (confirm('¿Estás seguro de que deseas eliminar este evento?')) {
-                            events.splice(index, 1);
-                            localStorage.setItem('timelineEvents', JSON.stringify(events));
-                            renderTimeline(events);
-                        }
-                    });        
+                         
                 });
             }
         });
